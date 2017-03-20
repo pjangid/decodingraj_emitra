@@ -1,0 +1,49 @@
+﻿@inherits Umbraco.Web.Macros.PartialViewMacroPage
+
+@{
+    var headerItem = Umbraco.Content(1058);
+    var loginItem = Umbraco.Content(1063);
+    var registerItem = Umbraco.Content(1066);
+}
+
+<div class="wrapper row0">
+    <div id="topbar" class="hoc clear">
+        <!-- ################################################################################################ -->
+        <div class="fl_left">
+            <ul>
+                <li><i class="fa fa-phone"></i>@headerItem.HelpContact</li>
+                <li><i class="fa fa-envelope-o"></i> @headerItem.HelpEmail</li>
+            </ul>
+        </div>
+        <div class="fl_right">
+            <ul>
+                <li><a href="/"><i class="fa fa-lg fa-home"></i></a></li>
+                <li><a href="@loginItem.Url">@loginItem.Name</a></li>
+                <li><a href="@registerItem.Url">@registerItem.Name</a></li>
+            </ul>
+        </div>
+        <!-- ################################################################################################ -->
+    </div>
+</div>
+
+<div class="wrapper row1">
+    <header id="header" class="hoc clear">
+        <!-- ################################################################################################ -->
+        <div id="logo" class="fl_left">
+            <h1><a href="/">E-Mitra</a></h1>
+        </div>
+        <div id="quickinfo" class="fl_right">
+            <ul class="nospace inline">
+                <li>
+                    <strong>Help Line:</strong><br>
+                    @headerItem.HelpContact 
+                </li>
+                @*<li>
+                    <strong>Efficitur:</strong><br>
+                    +00 (123) 456 7890
+                </li>*@
+            </ul>
+        </div>
+        <!-- ################################################################################################ -->
+    </header>
+</div>

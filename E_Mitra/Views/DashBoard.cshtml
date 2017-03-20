@@ -1,0 +1,31 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@{
+    Layout = "BasePage.cshtml";
+    var cls = "";
+    var count = 1;
+}
+
+<div class="wrapper row3">
+    <main class="hoc container clear" style="padding: 0;">
+        <h2>@CurrentPage.PageTitle</h2>
+        <br />
+        <div class="group btmspace-50 demo">
+            @foreach (var child in CurrentPage.Children.Where("Visible"))
+            {
+                if (count == 1 || count == 4 || count == 7)
+                {
+                    cls = "first";
+                }
+                else
+                {
+                    cls = "";
+                }
+                <div class="one_third @cls">
+                    <a href="@child.Url">@child.PageTitle</a>
+                </div>
+                count++;
+            }
+        </div>
+        <div class="clear"></div>
+    </main>
+</div>

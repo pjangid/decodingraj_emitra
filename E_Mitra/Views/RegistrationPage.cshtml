@@ -1,0 +1,119 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@{
+    Layout = "BasePage.cshtml";
+}
+
+<div class="wrapper row3">
+    <main class="hoc container clear" style="padding-top: 0px;">
+        <!-- main body -->
+        <!-- ################################################################################################ -->
+        <div class="content">
+            <!-- ################################################################################################ -->
+            <br />
+            <br />
+            <div id="comments" class="contactUsForm" data-return="/">
+                <form action="#" method="post" id="contactUsForm">
+                    <div class="one_half first">
+                        <label for="fullname">Full Name <span>*</span></label>
+                        <input name="fullname" id="fullname" value="" size="22" required="" type="text">
+                    </div>
+                    <div class="one_half">
+                        <label for="dob">DOB<span>*</span></label>
+                        <input name="dob" id="dob" value="" size="22" required="" placeholder="yyyy/mm/dd" type="date">
+                    </div>
+                    <div class="block clear">
+                        <label for="email">Email<span>*</span></label>
+                        <input name="email" id="email" value="" size="22" required="" type="email">
+                    </div>
+                    <div class="one_half first">
+                        <label for="uid">UID<span>*</span></label>
+                        <input name="uid" id="uid" value="" size="22" required="" placeholder="Adhaar Card ID" type="text">
+                    </div>
+                    <div class="one_half">
+                        <label for="mobile">Mobile<span>*</span></label>
+                        <input name="mobile" id="mobile" value="" size="22" required="" type="text">
+                    </div>
+                    <div>
+                        <input name="submit" value="Submit Form" type="submit">
+                        &nbsp;
+                        <input name="reset" value="Reset Form" type="reset">
+                    </div>
+                </form>
+            </div>
+            @*<div id="divSuccessMessageContainer">
+                    @Html.Raw(CurrentPage.SuccessMessage)
+                </div>*@
+            <div id="divFailMessageContainer">
+                Error in login
+            </div>
+            <!-- ################################################################################################ -->
+        </div>
+        <!-- ################################################################################################ -->
+        <!-- / main body -->
+        <div class="clear"></div>
+    </main>
+</div>
+<style>
+    #divSuccessMessageContainer, #divFailMessageContainer {
+        display: none;
+    }
+</style>
+<script>
+    $(function () {
+        var loginAction = function () {
+            var serviceUrl = "/Umbraco/Api/Authenticate/Login";
+            var RegisterModel = new Object();
+            RegisterModel.Fullname = $("input[name='fullname']").val();
+            RegisterModel.Dob = $("input[name='dob']").val();
+            RegisterModel.Email = $("input[name='email']").val();
+            RegisterModel.Uid = $("input[name='uid']").val();
+            RegisterModel.Mobile = $("input[name='mobile']").val();
+            console.log("ContactModel.FirstName: " + RegisterModel.Fullname);
+            console.log("ContactModel.Dob: " + RegisterModel.Dob);
+            console.log("ContactModel.Email: " + RegisterModel.Email);
+            console.log("ContactModel.Uid: " + RegisterModel.Uid);
+            console.log("ContactModel.Mobile: " + RegisterModel.Mobile);
+            console.log("Json obj: " + JSON.stringify(RegisterModel));
+
+            $.ajax({
+                method: 'POST',
+                url: serviceUrl,
+                dataType: 'json',
+                data: JSON.stringify(RegisterModel), //forms user object
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                success: successFunc,
+                error: errorFunc
+            });
+
+            function successFunc(data, status) {
+                console.log(data);
+                if (data === "true") {
+                    console.log('Success');
+                } else {
+                    console.log('Failed');
+                }
+                var url = $(".contactUsForm").attr("data-return");
+                console.log("redirect url: " + url);
+                if (url === undefined) {
+                    window.location.href = "/";
+                } else {
+                    window.location.href = url;
+                }
+            }
+
+            function errorFunc() {
+                console.log('error');
+                $(".contactUsForm").hide();
+                $("#divFailMessageContainer").show();
+            }
+        };
+
+        $(".contactUsForm").submit(function (event) {
+            loginAction();
+            event.preventDefault();
+        });
+    });
+</script>

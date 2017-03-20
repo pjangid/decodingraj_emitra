@@ -1,0 +1,128 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@{
+    Layout = "BasePage.cshtml";
+}
+
+
+<div class="wrapper row3">
+    <main class="hoc container clear" style="padding-top: 0px;">
+        <!-- main body -->
+        <!-- ################################################################################################ -->
+        <div class="content">
+            <!-- ################################################################################################ -->
+            <br />
+            <br />
+            <div id="comments" class="contactUsForm" data-redirect="/">
+                <form method="post" id="contactUsForm">
+                    <div class="one_half first">
+                        <label for="firstname">First Name<span>*</span></label>
+                        <input name="firstname" id="firstname" value="Praful" size="22" required="" type="text">
+                    </div>
+                    <div class="one_half">
+                        <label for="lastname">Last Name<span>*</span></label>
+                        <input name="lastname" id="lastname" value="Jangid" size="22" required="" type="text">
+                    </div>
+                    <div class="block clear">
+                        <label for="email">Email<span>*</span></label>
+                        <input name="email" id="email" size="22" required="" type="email">
+                    </div>
+                    <div class="one_half first">
+                        <label for="uid">UID<span>*</span></label>
+                        <input name="uid" id="uid" size="22" required="" placeholder="Adhaar Card ID" type="text">
+                    </div>
+                    <div class="one_half">
+                        <label for="mobile">Mobile<span>*</span></label>
+                        <input name="mobile" id="mobile" value="" size="22" required="" type="text" pattern="[789][0-9]{9}">
+                    </div>
+                    <div class="block clear">
+                        <label for="marksheet">10th Marksheet Serial Number<span>*</span></label>
+                        <input name="marksheet" id="marksheet" size="22" required="" type="text" pattern="[0-9]{7}">
+                    </div>
+                    <div>
+                        <input name="submit" value="Submit Form" type="submit">
+                        &nbsp;
+                        <input name="reset" value="Reset Form" type="reset">
+                    </div>
+                </form>
+            </div>
+            <div id="divFailMessageContainer">
+                <h2>Failed to create application request.</h2>
+            </div>
+            <div id="divSuccessMessageContainer">
+                <h2>Request Successfully submitted</h2>
+                <p class="msg">
+                </p>
+            </div>
+            <!-- ################################################################################################ -->
+        </div>
+        <!-- ################################################################################################ -->
+        <!-- / main body -->
+        <div class="clear"></div>
+    </main>
+</div>
+
+<style>
+    #divSuccessMessageContainer, #divFailMessageContainer {
+        display: none;
+    }
+</style>
+
+<script>
+    $(function () {
+        var loginAction = function () {
+            var serviceUrl = "/Umbraco/Api/Application/NewApplication";
+            var ApplicationModel = new Object();
+            ApplicationModel.Firstname = $("input[name='firstname']").val();
+            ApplicationModel.Lastname = $("input[name='lastname']").val();
+            ApplicationModel.Email = $("input[name='email']").val();
+            ApplicationModel.Uid = $("input[name='uid']").val();
+            ApplicationModel.Mobile = $("input[name='mobile']").val();
+            ApplicationModel.MarkSheetNumber = $("input[name='marksheet']").val();
+            console.log("ContactModel.FirstName: " + ApplicationModel.Firstname);
+            console.log("ContactModel.Email: " + ApplicationModel.Email);
+            console.log("ContactModel.Uid: " + ApplicationModel.Uid);
+            console.log("ContactModel.Mobile: " + ApplicationModel.Mobile);
+            console.log("Json obj: " + JSON.stringify(ApplicationModel));
+
+            $.ajax({
+                method: 'POST',
+                url: serviceUrl,
+                dataType: 'json',
+                data: JSON.stringify(ApplicationModel), //forms user object
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                success: successFunc,
+                error: errorFunc
+            });
+
+            function successFunc(result) {
+                console.log(result);
+                $(".contactUsForm").hide();
+                console.log("status: " + result);
+
+                if (result !== undefined) {
+                    var msg = "Your application id:<strong>" + result + "</strong><br/>This id will be used to track your request.";
+                    $(".msg").html(msg);
+                    $("#divSuccessMessageContainer").show();
+                    console.log('Success');
+                } else {
+                    console.log('Failed');
+                    $("#divFailMessageContainer").show();
+                }
+            }
+
+            function errorFunc() {
+                console.log('error');
+                $(".contactUsForm").hide();
+                $("#divFailMessageContainer").show();
+            }
+        };
+
+        $(".contactUsForm").submit(function (event) {
+            loginAction();
+            event.preventDefault();
+        });
+    });
+</script>
