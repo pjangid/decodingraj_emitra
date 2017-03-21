@@ -1,10 +1,28 @@
 ﻿@inherits Umbraco.Web.Macros.PartialViewMacroPage
 
+@using System.Web.Mvc.Html
+@using ClientDependency.Core.Mvc
+@using Umbraco.Web
+@using Umbraco.Web.Models
+@using Umbraco.Web.Controllers
+
 @{
+    var loginStatusModel = Members.GetCurrentLoginStatus();
+
+    Html.EnableClientValidation();
+    Html.EnableUnobtrusiveJavaScript();
+    Html.RequiresJs("/umbraco_client/ui/jquery.js");
+    Html.RequiresJs("/umbraco_client/Application/JQuery/jquery.validate.min.js");
+    Html.RequiresJs("/umbraco_client/Application/JQuery/jquery.validate.unobtrusive.min.js");
+
+    var logoutModel = new PostRedirectModel();
+
     var headerItem = Umbraco.Content(1058);
     var loginItem = Umbraco.Content(1063);
     var registerItem = Umbraco.Content(1066);
+
 }
+@Html.RenderJsHere()
 
 <div class="wrapper row0">
     <div id="topbar" class="hoc clear">
@@ -18,8 +36,28 @@
         <div class="fl_right">
             <ul>
                 <li><a href="/"><i class="fa fa-lg fa-home"></i></a></li>
-                <li><a href="@loginItem.Url">@loginItem.Name</a></li>
-                <li><a href="@registerItem.Url">@registerItem.Name</a></li>
+                @if (loginStatusModel.IsLoggedIn)
+                {
+                    <li>@loginStatusModel.Name</li>
+                    <li><a href="/dashboard">Dashboard</a></li>
+                    <li>
+                        @using (Html.BeginUmbracoForm<UmbLoginStatusController>("HandleLogout"))
+                        {
+                            <fieldset style="float: left;">
+                                <legend>Logout</legend>
+                                <button style="background: none; border: none; cursor: pointer; line-height: 10px;">Logout</button>
+                            </fieldset>
+
+                            @Html.HiddenFor(m => logoutModel.RedirectUrl)
+                        }
+                    </li>
+                }
+                else
+                {
+                    <li><a href="@loginItem.Url">@loginItem.Name</a></li>
+                    <li><a href="@registerItem.Url">@registerItem.Name</a></li>
+                }
+
             </ul>
         </div>
         <!-- ################################################################################################ -->
@@ -36,12 +74,12 @@
             <ul class="nospace inline">
                 <li>
                     <strong>Help Line:</strong><br>
-                    @headerItem.HelpContact 
+                    @headerItem.HelpContact
                 </li>
                 @*<li>
-                    <strong>Efficitur:</strong><br>
-                    +00 (123) 456 7890
-                </li>*@
+                        <strong>Efficitur:</strong><br>
+                        +00 (123) 456 7890
+                    </li>*@
             </ul>
         </div>
         <!-- ################################################################################################ -->

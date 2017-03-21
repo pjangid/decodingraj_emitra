@@ -1,0 +1,45 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+
+@{
+	Layout = "BasePage.cshtml";
+    var applicationFolder = Umbraco.Content(1083);
+    var reviewPage = Umbraco.Content(1120);
+    
+}
+
+<div class="wrapper row3">
+    <main class="hoc container clear" style="padding: 0;">
+        <!-- main body -->
+        <h1>@CurrentPage.PageTitle</h1>
+        <!-- ################################################################################################ -->
+        <div class="content">
+           
+            <div class="scrollable">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>UID</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Edit Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var applicationItem in applicationFolder.Children.Where("Visible")) {
+                        var redirectTo = reviewPage.Url + "/?uid=" + applicationItem.UID;
+                        <tr>
+                            <td>@applicationItem.UID</td>
+                            <td>@applicationItem.FirstName&nbsp;@applicationItem.LastName</td>
+                            <td>@applicationItem.Status</td>
+                            <td><a href="@redirectTo">View</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+        <!-- / main body -->
+        <div class="clear"></div>
+    </main>
+</div>

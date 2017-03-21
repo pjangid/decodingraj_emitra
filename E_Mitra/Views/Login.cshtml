@@ -3,6 +3,22 @@
     Layout = "BasePage.cshtml";
 }
 
+@using System.Web.Mvc.Html
+@using ClientDependency.Core.Mvc
+@using Umbraco.Web
+@using Umbraco.Web.Models
+@using Umbraco.Web.Controllers
+
+@{
+    var loginModel = new LoginModel();
+
+    Html.EnableClientValidation();
+    Html.EnableUnobtrusiveJavaScript();
+    Html.RequiresJs("/umbraco_client/ui/jquery.js");
+    Html.RequiresJs("/umbraco_client/Application/JQuery/jquery.validate.min.js");
+    Html.RequiresJs("/umbraco_client/Application/JQuery/jquery.validate.unobtrusive.min.js");
+}
+
 @{
     var redirectTo = Umbraco.Content(CurrentPage.RedirectUrl);
 }
@@ -15,21 +31,45 @@
             <br />
             <br />
             <div id="comments" class="contactUsForm" data-return="@redirectTo.Url">
-                <form action="#" method="post" id="contactUsForm">
-                    <div class="one_half first">
-                        <label for="username">User Name <span>*</span></label>
-                        <input name="username" id="username" value="" size="22" required="" type="text">
-                    </div>
-                    <div class="one_half">
-                        <label for="password">Password<span>*</span></label>
-                        <input name="password" id="password" value="" size="22" required="" type="password">
-                    </div>
-                    <div>
-                        <input name="submit" value="Submit Form" type="submit">
-                        &nbsp;
-                        <input name="reset" value="Reset Form" type="reset">
-                    </div>
-                </form>
+                @* NOTE: This RenderJsHere code should be put on your main template page where the rest of your script tags are placed *@
+                @Html.RenderJsHere()
+
+                @using (Html.BeginUmbracoForm<UmbLoginController>("HandleLogin"))
+                {
+                    <fieldset>
+                        <legend>Login</legend>
+
+                        @Html.ValidationSummary("loginModel", true)
+
+                        @Html.LabelFor(m => loginModel.Username)
+                        @Html.TextBoxFor(m => loginModel.Username)
+                        @Html.ValidationMessageFor(m => loginModel.Username)
+                        <br />
+
+                        @Html.LabelFor(m => loginModel.Password)
+                        @Html.PasswordFor(m => loginModel.Password)
+                        @Html.ValidationMessageFor(m => loginModel.Password)
+                        <br />
+
+                        <button>Login</button>
+                    </fieldset>
+                }
+                @*<form action="#" method="post" id="contactUsForm">
+                        <div class="one_half first">
+                            <label for="username">User Name <span>*</span></label>
+                            <input name="username" id="username" value="" size="22" required="" type="text">
+                        </div>
+                        <div class="one_half">
+                            <label for="password">Password<span>*</span></label>
+                            <input name="password" id="password" value="" size="22" required="" type="password">
+                        </div>
+                        <div>
+                            <input name="submit" value="Submit Form" type="submit">
+                            &nbsp;
+                            <input name="reset" value="Reset Form" type="reset">
+                        </div>
+                    </form>*@
+
             </div>
             @*<div id="divSuccessMessageContainer">
                     @Html.Raw(CurrentPage.SuccessMessage)
@@ -96,9 +136,9 @@
             }
         };
 
-        $(".contactUsForm").submit(function (event) {
-            loginAction();
-            event.preventDefault();
-        });
+        //$(".contactUsForm").submit(function (event) {
+        //    loginAction();
+        //    event.preventDefault();
+        //});
     });
 </script>

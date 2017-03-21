@@ -147,6 +147,11 @@
     <Content Include="Views\NewApplication.cshtml" />
     <Content Include="Views\ApplicationItem.cshtml" />
     <Content Include="Views\TrackApplication.cshtml" />
+    <Content Include="Views\biller.cshtml" />
+    <Content Include="Views\BillingDashboard1.cshtml" />
+    <Content Include="Views\BillingDashboard.cshtml" />
+    <Content Include="Views\MemberDashBoard.cshtml" />
+    <Content Include="Views\ReviewRequest.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

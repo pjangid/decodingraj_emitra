@@ -1,8 +1,7 @@
 ﻿using E_Mitra.Model;
 using System;
 using System.Web.Http;
-using System.Web.Mvc;
-using Umbraco.Core.Services;
+using umbraco.NodeFactory;
 using Umbraco.Web.WebApi;
 
 namespace E_Mitra.Controller
@@ -36,6 +35,14 @@ namespace E_Mitra.Controller
             content.SetValue("TransectionNumber", txn);
             content.SetValue("MarksheetNumber", userInfo.MarksheetNumber);
             cs.SaveAndPublishWithStatus(content);
+        }
+        [System.Web.Http.HttpPost]
+        public string GetApplication([FromBody]UserInfo userinfo)
+        {
+            var uid = userinfo.UID;
+            var userinfoItems = Umbraco.Content(1083).Children.Where("UID==userinfo.UID");            
+            var info= userinfoItems == null ? "" : userinfoItems[0];
+            return Json(info);
         }
     }
 }

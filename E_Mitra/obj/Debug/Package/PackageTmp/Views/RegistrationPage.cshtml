@@ -1,7 +1,51 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+﻿@using System.Web.Mvc.Html
+@using ClientDependency.Core.Mvc
+@using Umbraco.Web
+@using Umbraco.Web.Controllers
+
+@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
 @{
     Layout = "BasePage.cshtml";
 }
+@{
+    @*
+        You can specify a custom member type alias in the constructor, the default is 'Member'
+        for example, to use 'Custom Member' you'd use this syntax:
+
+        var registerModel = Members.CreateRegistrationModel("Custom Member");
+    *@
+
+    var registerModel = Members.CreateRegistrationModel();
+
+    @*
+        Configurable here:
+
+        registerModel.RedirectUrl       - Optional. What path to redirect to if registration is successful.
+                                          By default the member will be redirected to the current umbraco page
+                                          unless this is specified.
+
+        registerModel.UsernameIsEmail   - the default is true
+                                          if you want the username to be different from the email
+                                          address, set this to true and add a new Username field in
+                                          the form below
+
+                                          @Html.LabelFor(m => registerModel.Username)
+                                          @Html.TextBoxFor(m => registerModel.Username)
+                                          @Html.ValidationMessageFor(m => registerModel.Username)
+    *@
+
+    Html.EnableClientValidation();
+    Html.EnableUnobtrusiveJavaScript();
+    Html.RequiresJs("/umbraco_client/ui/jquery.js");
+    Html.RequiresJs("/umbraco_client/Application/JQuery/jquery.validate.min.js");
+    Html.RequiresJs("/umbraco_client/Application/JQuery/jquery.validate.unobtrusive.min.js");
+
+    var success = TempData["FormSuccess"] != null;
+}
+
+@*NOTE: This RenderJsHere code should be put on your main template page where the rest of your script tags are placed*@
+@Html.RenderJsHere()
+
 
 <div class="wrapper row3">
     <main class="hoc container clear" style="padding-top: 0px;">
@@ -12,40 +56,110 @@
             <br />
             <br />
             <div id="comments" class="contactUsForm" data-return="/">
-                <form action="#" method="post" id="contactUsForm">
-                    <div class="one_half first">
-                        <label for="fullname">Full Name <span>*</span></label>
-                        <input name="fullname" id="fullname" value="" size="22" required="" type="text">
-                    </div>
-                    <div class="one_half">
-                        <label for="dob">DOB<span>*</span></label>
-                        <input name="dob" id="dob" value="" size="22" required="" placeholder="yyyy/mm/dd" type="date">
-                    </div>
-                    <div class="block clear">
-                        <label for="email">Email<span>*</span></label>
-                        <input name="email" id="email" value="" size="22" required="" type="email">
-                    </div>
-                    <div class="one_half first">
-                        <label for="uid">UID<span>*</span></label>
-                        <input name="uid" id="uid" value="" size="22" required="" placeholder="Adhaar Card ID" type="text">
-                    </div>
-                    <div class="one_half">
-                        <label for="mobile">Mobile<span>*</span></label>
-                        <input name="mobile" id="mobile" value="" size="22" required="" type="text">
-                    </div>
-                    <div>
-                        <input name="submit" value="Submit Form" type="submit">
-                        &nbsp;
-                        <input name="reset" value="Reset Form" type="reset">
-                    </div>
-                </form>
+                @if (success)
+                {
+                    @* This message will show if RedirectOnSucces is set to false (default) *@
+                    <p>Registration succeeeded.</p>
+                }
+                else
+                {
+                    using (Html.BeginUmbracoForm<UmbRegisterController>("HandleRegisterMember"))
+                    {
+                        <fieldset>
+                            <legend>Register Member</legend>
+
+                            @Html.ValidationSummary("registerModel", true)
+
+                            @Html.LabelFor(m => registerModel.Name)
+                            @Html.TextBoxFor(m => registerModel.Name)
+                            @Html.ValidationMessageFor(m => registerModel.Name)
+                            <br />
+                            @*<div class="one_half">
+                                <label for="dob">DOB<span>*</span></label>
+                                <input name="dob" id="dob" value="" size="22" required="" placeholder="yyyy/mm/dd" type="date">
+                            </div>
+                            <div class="one_half first">
+                                <label for="uid">UID<span>*</span></label>
+                                <input name="uid" id="uid" value="" size="22" required="" placeholder="Adhaar Card ID" type="text">
+                            </div>
+                            <div class="one_half">
+                                <label for="mobile">Mobile<span>*</span></label>
+                                <input name="mobile" id="mobile" value="" size="22" required="" type="text">
+                            </div>*@
+
+                            @Html.LabelFor(m => registerModel.Email)
+                            @Html.TextBoxFor(m => registerModel.Email)
+                            @Html.ValidationMessageFor(m => registerModel.Email)
+                            <br />
+
+                            @Html.LabelFor(m => registerModel.Password)
+                            @Html.PasswordFor(m => registerModel.Password)
+                            @Html.ValidationMessageFor(m => registerModel.Password)
+                            <br />
+
+                            @if (registerModel.MemberProperties != null)
+                            {
+                                @*
+                                    It will only displays properties marked as "Member can edit" on the "Info" tab of the Member Type.
+                                *@
+                                for (var i = 0; i < registerModel.MemberProperties.Count; i++)
+                                {
+                                    @Html.LabelFor(m => registerModel.MemberProperties[i].Value, registerModel.MemberProperties[i].Name)
+                                    @*
+                                        By default this will render a textbox but if you want to change the editor template for this property you can
+                                        easily change it. For example, if you wanted to render a custom editor for this field called "MyEditor" you would
+                                        create a file at ~/Views/Shared/EditorTemplates/MyEditor.cshtml", then you will change the next line of code to
+                                        render your specific editor template like:
+                                        @Html.EditorFor(m => profileModel.MemberProperties[i].Value, "MyEditor")
+                                    *@
+                                    @Html.EditorFor(m => registerModel.MemberProperties[i].Value)
+                                    @Html.HiddenFor(m => registerModel.MemberProperties[i].Alias)
+                                    <br />
+                                }
+                            }
+
+                            @Html.HiddenFor(m => registerModel.MemberTypeAlias)
+                            @Html.HiddenFor(m => registerModel.RedirectUrl)
+                            @Html.HiddenFor(m => registerModel.UsernameIsEmail)
+
+                            <button>Register</button>
+                        </fieldset>
+                    }
+                }
+                @*<form action="#" method="post" id="contactUsForm">
+                        <div class="one_half first">
+                            <label for="fullname">Full Name <span>*</span></label>
+                            <input name="fullname" id="fullname" value="" size="22" required="" type="text">
+                        </div>
+                        <div class="one_half">
+                            <label for="dob">DOB<span>*</span></label>
+                            <input name="dob" id="dob" value="" size="22" required="" placeholder="yyyy/mm/dd" type="date">
+                        </div>
+                        <div class="block clear">
+                            <label for="email">Email<span>*</span></label>
+                            <input name="email" id="email" value="" size="22" required="" type="email">
+                        </div>
+                        <div class="one_half first">
+                            <label for="uid">UID<span>*</span></label>
+                            <input name="uid" id="uid" value="" size="22" required="" placeholder="Adhaar Card ID" type="text">
+                        </div>
+                        <div class="one_half">
+                            <label for="mobile">Mobile<span>*</span></label>
+                            <input name="mobile" id="mobile" value="" size="22" required="" type="text">
+                        </div>
+                        <div>
+                            <input name="submit" value="Submit Form" type="submit">
+                            &nbsp;
+                            <input name="reset" value="Reset Form" type="reset">
+                        </div>
+                    </form>*@
             </div>
             @*<div id="divSuccessMessageContainer">
                     @Html.Raw(CurrentPage.SuccessMessage)
                 </div>*@
-            <div id="divFailMessageContainer">
-                Error in login
-            </div>
+            @*<div id="divFailMessageContainer">
+                    Error in login
+                </div>*@
             <!-- ################################################################################################ -->
         </div>
         <!-- ################################################################################################ -->
@@ -53,67 +167,67 @@
         <div class="clear"></div>
     </main>
 </div>
-<style>
-    #divSuccessMessageContainer, #divFailMessageContainer {
-        display: none;
-    }
-</style>
-<script>
-    $(function () {
-        var loginAction = function () {
-            var serviceUrl = "/Umbraco/Api/Authenticate/Login";
-            var RegisterModel = new Object();
-            RegisterModel.Fullname = $("input[name='fullname']").val();
-            RegisterModel.Dob = $("input[name='dob']").val();
-            RegisterModel.Email = $("input[name='email']").val();
-            RegisterModel.Uid = $("input[name='uid']").val();
-            RegisterModel.Mobile = $("input[name='mobile']").val();
-            console.log("ContactModel.FirstName: " + RegisterModel.Fullname);
-            console.log("ContactModel.Dob: " + RegisterModel.Dob);
-            console.log("ContactModel.Email: " + RegisterModel.Email);
-            console.log("ContactModel.Uid: " + RegisterModel.Uid);
-            console.log("ContactModel.Mobile: " + RegisterModel.Mobile);
-            console.log("Json obj: " + JSON.stringify(RegisterModel));
+@*<style>
+        #divSuccessMessageContainer, #divFailMessageContainer {
+            display: none;
+        }
+    </style>*@
+@*<script>
+        $(function () {
+            var loginAction = function () {
+                var serviceUrl = "/Umbraco/Api/Authenticate/Login";
+                var RegisterModel = new Object();
+                RegisterModel.Fullname = $("input[name='fullname']").val();
+                RegisterModel.Dob = $("input[name='dob']").val();
+                RegisterModel.Email = $("input[name='email']").val();
+                RegisterModel.Uid = $("input[name='uid']").val();
+                RegisterModel.Mobile = $("input[name='mobile']").val();
+                console.log("ContactModel.FirstName: " + RegisterModel.Fullname);
+                console.log("ContactModel.Dob: " + RegisterModel.Dob);
+                console.log("ContactModel.Email: " + RegisterModel.Email);
+                console.log("ContactModel.Uid: " + RegisterModel.Uid);
+                console.log("ContactModel.Mobile: " + RegisterModel.Mobile);
+                console.log("Json obj: " + JSON.stringify(RegisterModel));
 
-            $.ajax({
-                method: 'POST',
-                url: serviceUrl,
-                dataType: 'json',
-                data: JSON.stringify(RegisterModel), //forms user object
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                $.ajax({
+                    method: 'POST',
+                    url: serviceUrl,
+                    dataType: 'json',
+                    data: JSON.stringify(RegisterModel), //forms user object
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
-                success: successFunc,
-                error: errorFunc
+                    success: successFunc,
+                    error: errorFunc
+                });
+
+                function successFunc(data, status) {
+                    console.log(data);
+                    if (data === "true") {
+                        console.log('Success');
+                    } else {
+                        console.log('Failed');
+                    }
+                    var url = $(".contactUsForm").attr("data-return");
+                    console.log("redirect url: " + url);
+                    if (url === undefined) {
+                        window.location.href = "/";
+                    } else {
+                        window.location.href = url;
+                    }
+                }
+
+                function errorFunc() {
+                    console.log('error');
+                    $(".contactUsForm").hide();
+                    $("#divFailMessageContainer").show();
+                }
+            };
+
+            $(".contactUsForm").submit(function (event) {
+                loginAction();
+                event.preventDefault();
             });
-
-            function successFunc(data, status) {
-                console.log(data);
-                if (data === "true") {
-                    console.log('Success');
-                } else {
-                    console.log('Failed');
-                }
-                var url = $(".contactUsForm").attr("data-return");
-                console.log("redirect url: " + url);
-                if (url === undefined) {
-                    window.location.href = "/";
-                } else {
-                    window.location.href = url;
-                }
-            }
-
-            function errorFunc() {
-                console.log('error');
-                $(".contactUsForm").hide();
-                $("#divFailMessageContainer").show();
-            }
-        };
-
-        $(".contactUsForm").submit(function (event) {
-            loginAction();
-            event.preventDefault();
         });
-    });
-</script>
+    </script>*@
